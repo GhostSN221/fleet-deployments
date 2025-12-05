@@ -1,5 +1,0 @@
-namespace: metallb-system
-targets:
-- clusterSelector:
-    matchLabels:
-      fleet.cattle.io/cluster-name: local

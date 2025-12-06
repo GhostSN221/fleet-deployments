@@ -1,0 +1,64 @@
+# TaskFlow Manager - Guide de Déploiement
+
+## Architecture
+┌─────────────────────────────────────────┐
+│ Load Balancer / Ingress │
+└─────────────────┬───────────────────────┘
+│
+┌─────────▼──────────┐
+│ Frontend (React) │
+│ Port: 80 │
+└─────────┬──────────┘
+│
+┌─────────▼──────────┐
+│ Backend API │
+│ Port: 8080 │
+└─────┬──────┬───────┘
+│ │
+┌─────────▼┐ ┌──▼─────────┐
+│ PostgreSQL│ │ Redis │
+│ Port: 5432│ │ Port: 6379 │
+└──────────┘ └────────────┘
+│
+┌─────▼──────┐
+│ Worker │
+│ (Async) │
+└────────────┘
+
+## Déploiement avec Rancher Fleet
+
+### 1. Build des images
+```bash
+./build-and-push.sh
+
+2. Déploiement GitOps
+./deploy-to-fleet.sh
+
+
+
+3. Vérification
+
+# Vérifier les pods
+kubectl get pods -n taskflow-production
+
+# Vérifier les services
+kubectl get svc -n taskflow-production
+
+# Vérifier l'ingress
+kubectl get ingress -n taskflow-production
+
+# Voir les logs
+kubectl logs -n taskflow-production deployment/frontend
+
+
+4. Accès
+Frontend: http://<cluster-ip>/
+
+API Health: http://<cluster-ip>/api/health
+
+PostgreSQL: postgres-service.taskflow-production.svc.cluster.local:5432
+
+Redis: redis-service.taskflow-production.svc.cluster.local:6379
+
+
+

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api
+  namespace: taskflow-production
+  labels:
+    app: taskflow
+    tier: backend
+spec:
+  replicas: {{ .Values.replicas.backend | default 2 }}
+  selector:
+    matchLabels:
+      app: taskflow
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: taskflow
+        tier: backend
+    spec:
+      containers:
+      - name: backend
+        image: {{ .Values.images.backend | default "ghcr.io/yourname/taskflow-backend:latest" }}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_HOST
+          value: "postgres-service.taskflow-production.svc.cluster.local"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "taskflow"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: password
+        - name: REDIS_HOST
+          value: "redis-service.taskflow-production.svc.cluster.local"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: taskflow-production
+spec:
+  selector:
+    app: taskflow
+    tier: backend
+  ports:
+  - port: 8080
+    targetPort: 8080

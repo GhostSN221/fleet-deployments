@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: taskflow-production
+  labels:
+    app: taskflow
+    tier: frontend
+spec:
+  replicas: {{ .Values.replicas.frontend | default 2 }}
+  selector:
+    matchLabels:
+      app: taskflow
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: taskflow
+        tier: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: {{ .Values.images.frontend | default "ghcr.io/yourname/taskflow-frontend:latest" }}
+        ports:
+        - containerPort: 80
+        env:
+        - name: REACT_APP_API_URL
+          value: "http://backend-service.taskflow-production.svc.cluster.local:8080"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: taskflow-production
+spec:
+  selector:
+    app: taskflow
+    tier: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+  type: NodePort

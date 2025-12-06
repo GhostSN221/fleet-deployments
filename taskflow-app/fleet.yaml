@@ -1,0 +1,14 @@
+namespace: taskflow-production
+targets:
+- clusterSelector:
+    matchLabels:
+      fleet.cattle.io/cluster-name: local
+  values:
+    replicas:
+      frontend: 2
+      backend: 3
+      worker: 2
+    images:
+      frontend: ghcr.io/yourname/taskflow-frontend:latest
+      backend: ghcr.io/yourname/taskflow-backend:latest
+      worker: ghcr.io/yourname/taskflow-worker:latest

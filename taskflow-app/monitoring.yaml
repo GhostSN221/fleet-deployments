@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: taskflow-monitor
+  namespace: taskflow-production
+  labels:
+    app: taskflow
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: taskflow
+  endpoints:
+  - port: backend-port
+    interval: 30s
+    path: /health
+  - port: frontend-port
+    interval: 30s
+    path: /health
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskflow-metrics
+  namespace: taskflow-production
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+spec:
+  selector:
+    app: taskflow
+    tier: backend
+  ports:
+  - name: backend-port
+    port: 8080
+    targetPort: 8080
+  - name: frontend-port
+    port: 80
+    targetPort: 80

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cuberfit-backend
+  namespace: cuberfit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cuberfit-backend
+  template:
+    metadata:
+      labels:
+        app: cuberfit-backend
+    spec:
+      imagePullSecrets:
+      - name: gitlab-registry
+      containers:
+      - name: backend
+        # IMAGE DOCKER ICI !
+        image: git.systalink.fr:5050/gracien_fiomedon/cuberfit:backend
+        ports:
+        - containerPort: 3000

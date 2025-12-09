@@ -1,0 +1,14 @@
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: cuberfit-app
+  namespace: fleet-default
+spec:
+  repo: https://github.com/GhostSN221/fleet-deployments.git  # mon  REPO de deploments!
+  paths:
+    - "./clients/cuberfit/k8s/"  # Chemin dans mon  repo
+  targets:
+    - name: cuberfit-production
+      clusterSelector:
+        matchLabels:
+          client: cuberfit
